@@ -1,0 +1,5 @@
+# config/routes.yaml
+tickets_store:
+    path: /tickets
+    methods: [POST]
+    controller: App\Controller\TicketController::store

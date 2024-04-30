@@ -62,9 +62,13 @@ class TicketController extends Controller
      * Display the specified resource.
      */
     public function show(Ticket $ticket)
-    {
-        //
-    }
+{
+    return response()->json([
+        'description' => $ticket->description,
+    ]);
+}
+
+
 
     /**
      * Show the form for editing the specified resource.
@@ -80,20 +84,42 @@ class TicketController extends Controller
      */
     public function update(UpdateTicketRequest $request, Ticket $ticket)
     {
-        //
-        $ticket->update([
-            'status' => $request->status
-        ]);
+        // Get the status value from the request
+        $status = $request->input('status');
 
-        // You can also add a success message or redirect the user to a specific page
-        return back()->with('success', 'Ticket status updated successfully.');
+        // Ensure the status is not null
+        if (!is_null($status)) {
+            // Update the ticket's status
+            $ticket->update([
+                'status' => $status
+            ]);
+
+            // You can also add a success message or redirect the user to a specific page
+            return back()->with('success', 'Ticket status updated successfully.');
+        } else {
+            // Handle the case where the status is null
+            return back()->with('error', 'Status cannot be null.');
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Ticket $ticket)
+    public function destroy(Ticket $ticket, $id)
     {
-        //
+        // Find the ticket by ID if necessary
+        if ($ticket->id != $id) {
+            $ticket = Ticket::findOrFail($id);
+        }
+
+        // Delete the ticket
+        $ticket->delete();
+
+
+        // Optionally, you can add a flash message or perform any additional actions
+        $userTickets = Ticket::where('user_id', Auth::id())->get();
+        // Redirect to a relevant page
+        return view('/dashboard', ['tickets' => $userTickets])->with('success', 'Ticket created successfully');
     }
+
 }
